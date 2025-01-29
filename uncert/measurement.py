@@ -23,6 +23,13 @@ class Measurement:
     >>> str(val)
     '30 ± 4'
 
+    However, if the two `Measurement`s are the same one, the correlation
+    coefficient is assumed to be 1:
+    >>> str(val - val)
+    '0 ± 0'
+    >>> str(val + val)
+    '60 ± 7'
+
     The Python `__repr__` of `Measurement` retains the full precision while
     still letting the user see the rounded values:
     >>> val
@@ -238,6 +245,9 @@ class Measurement:
         return Measurement(self.center + other.center, new_uncert)
 
     def __add__(self, other):
+        if other is self:
+            # Always full correlation in this case
+            return self.add_with_correlation(other, r=1)
         if isinstance(other, Measurement):
             return self.add_with_correlation(other)
         # Assume `other` is a pure number
@@ -252,10 +262,13 @@ class Measurement:
     def sub_with_correlation(self, other, r=0.0):
         """Subtract two `Measurement`s with the given correlation coefficient."""
         self._check_other_is_us(other)
-        new_uncert = self.uncert.add_uncert(other.uncert, r=r)
+        new_uncert = self.uncert.add_uncert(other.uncert, r=-r)
         return Measurement(self.center - other.center, new_uncert)
 
     def __sub__(self, other):
+        if other is self:
+            # Always full correlation in this case
+            return self.sub_with_correlation(other, r=1)
         if isinstance(other, Measurement):
             return self.sub_with_correlation(other)
         # Assume `other` is a pure number
@@ -279,6 +292,9 @@ class Measurement:
         return Measurement(new_center, new_reluncert * new_center)
 
     def __mul__(self, other):
+        if other is self:
+            # Always full correlation in this case
+            return self.mul_with_correlation(other, r=1)
         if isinstance(other, Measurement):
             return self.mul_with_correlation(other)
         # Assume `other` is a pure number
@@ -295,10 +311,13 @@ class Measurement:
         self._check_other_is_us(other)
         new_center = self.center / other.center
         new_reluncert = (self.uncert/self.center).add_uncert(
-            other.uncert / other.center, r=r)
+            other.uncert / other.center, r=-r)
         return Measurement(new_center, new_reluncert * new_center)
 
     def __truediv__(self, other):
+        if other is self:
+            # Always full correlation in this case
+            return self.truediv_with_correlation(other, r=1)
         if isinstance(other, Measurement):
             return self.truediv_with_correlation(other)
         # Assume `other` is a pure number
@@ -345,7 +364,7 @@ class Measurement:
         0.5
         """
         if isinstance(other, Measurement):
-            diff = self.sub_with_correlation(other, r=r)
+            diff = self.sub_with_correlation(other, r=-r)
         else:
             # This might raise TypeError if `other` is not to be added
             diff = self - other
