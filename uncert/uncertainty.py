@@ -15,7 +15,8 @@ class Uncertainty:
     convert this object to a string.
 
     If the content is an array, this type will internally represent the
-    data as a NumPy array.
+    data as a NumPy array. Otherwise, the internal representation is a
+    `np.float64`.
 
     Examples
     --------
@@ -194,10 +195,9 @@ class Uncertainty:
         return str_one(self.u, npow)
 
     def __repr__(self):
-        if self.is_array_type():
-            # I don't like NumPy's default repr
-            return f"Uncertainty({self}, full={list(self.u)})"
-        return f"Uncertainty({self}, full={self.u})"
+        # I don't like NumPy's default repr so `tolist`
+        # it also works on scalars because we store them as `np.float64`
+        return f"Uncertainty({self}, full={self.u.tolist()})"
 
     def add_uncert(self, other, r=0.0):
         """Add two uncertainties assuming a given correlation coefficient.

@@ -209,11 +209,11 @@ class Measurement:
         if self.is_array_type():
             if self.uncert.is_array_type():
                 data = [self._shared_stringify(c, u) for c, u in zip(self.center, self.uncert)]
-                full_center = list(self.center)
-                full_uncert = list(self.uncert.u)
+                full_center = self.center.tolist()
+                full_uncert = self.uncert.u.tolist()
             else:
                 data = [self._shared_stringify(c, self.uncert) for c in self.center]
-                full_center = list(self.center)
+                full_center = self.center.tolist()
                 full_uncert = self.uncert
             centerstrs, uncertstrs = zip(*data)
             centerstr = ", ".join(centerstrs)
@@ -346,7 +346,7 @@ class Measurement:
         else:
             # This might raise TypeError if `other` is not to be added
             diff = self - other
-        return abs(diff.center) / diff.uncert.u
+        return (abs(diff.center) / diff.uncert.u).tolist()
 
     def _comparison_method(self, other, operation):
         """Shared code for `__lt__`, `__le__`, etc."""
