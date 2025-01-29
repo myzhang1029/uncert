@@ -199,6 +199,10 @@ class Uncertainty:
         # it also works on scalars because we store them as `np.float64`
         return f"Uncertainty({self}, full={self.u.tolist()})"
 
+    def _repr_pretty_(self, p, cycle):
+        """Pretty-print for IPython."""
+        p.text(str(self) if not cycle else '...')
+
     def add_uncert(self, other, r=0.0):
         """Add two uncertainties assuming a given correlation coefficient.
 

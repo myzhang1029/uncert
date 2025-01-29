@@ -222,6 +222,9 @@ class Measurement:
         centerstr, uncertstr = self._shared_stringify(self.center, self.uncert)
         return f"Measurement({centerstr}, {uncertstr}, full_center={self.center}, full_uncert={self.uncert})"
 
+    def _repr_pretty_(self, p, cycle):
+        """Pretty-print for IPython."""
+        p.text(str(self) if not cycle else '...')
 
     @staticmethod
     def _check_other_is_us(other):
