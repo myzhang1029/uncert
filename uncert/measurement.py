@@ -33,7 +33,7 @@ class Measurement:
     The Python `__repr__` of `Measurement` retains the full precision while
     still letting the user see the rounded values:
     >>> val
-    Measurement(30, 4, full_center=30.119999999999997, full_uncert=4)
+    Measurement(30, 4, full_center=30.119999999999997, full_uncert=3.6886313179823222)
 
     Also useful for formatting a single value with uncertainty:
 
@@ -60,7 +60,7 @@ class Measurement:
 
     They work just like arrays:
     >>> mar[2]
-    Measurement(2.00, 0.18, full_center=2, full_uncert=0.18)
+    Measurement(2.00, 0.18, full_center=2, full_uncert=0.18000000000000002)
     >>> str(mar[4])
     '4.0 ± 0.3'
 
@@ -72,7 +72,7 @@ class Measurement:
     Array-type `Measurement` can be converted to and from a list of `Measurement`:
     >>> lm = mar.as_simple_list()
     >>> lm
-    [Measurement(0.00, 0.10, full_center=0, full_uncert=0.10), Measurement(1.00, 0.14, full_center=1, full_uncert=0.14), Measurement(2.00, 0.18, full_center=2, full_uncert=0.18), Measurement(3.0, 0.2, full_center=3, full_uncert=0.2), Measurement(4.0, 0.3, full_center=4, full_uncert=0.3)]
+    [Measurement(0.00, 0.10, full_center=0, full_uncert=0.1), Measurement(1.00, 0.14, full_center=1, full_uncert=0.14), Measurement(2.00, 0.18, full_center=2, full_uncert=0.18000000000000002), Measurement(3.0, 0.2, full_center=3, full_uncert=0.22000000000000003), Measurement(4.0, 0.3, full_center=4, full_uncert=0.26)]
     >>> Measurement.from_simple_list(lm)
     Measurement([0.00, 1.00, 2.00, 3.0, 4.0], [0.10, 0.14, 0.18, 0.2, 0.3], full_center=[0, 1, 2, 3, 4], full_uncert=[0.1, 0.14, 0.18000000000000002, 0.22000000000000003, 0.26])
     """
@@ -214,20 +214,16 @@ class Measurement:
 
     def __repr__(self):
         if self.is_array_type():
-            if self.uncert.is_array_type():
-                data = [self._shared_stringify(c, u) for c, u in zip(self.center, self.uncert)]
-                full_center = self.center.tolist()
-                full_uncert = self.uncert.u.tolist()
-            else:
-                data = [self._shared_stringify(c, self.uncert) for c in self.center]
-                full_center = self.center.tolist()
-                full_uncert = self.uncert
+            data = [self._shared_stringify(c, u) for c, u in zip(self.center, self.uncert)]
+            full_center = self.center.tolist()
+            # Either `float` or `list[float]`
+            full_uncert = self.uncert.u.tolist()
             centerstrs, uncertstrs = zip(*data)
             centerstr = ", ".join(centerstrs)
             uncertstr = ", ".join(uncertstrs)
             return f"Measurement([{centerstr}], [{uncertstr}], full_center={full_center}, full_uncert={full_uncert})"
         centerstr, uncertstr = self._shared_stringify(self.center, self.uncert)
-        return f"Measurement({centerstr}, {uncertstr}, full_center={self.center}, full_uncert={self.uncert})"
+        return f"Measurement({centerstr}, {uncertstr}, full_center={self.center}, full_uncert={self.uncert.u})"
 
     def _repr_pretty_(self, p, cycle):
         """Pretty-print for IPython."""
