@@ -1,10 +1,14 @@
 import math
+import warnings
 
 import numpy as np
 
 
 @np.vectorize
 def _get_significant_digit_one(u):
+    if np.isnan(u) or np.isinf(u):
+        warnings.warn("NaN or inf uncertainty encountered", RuntimeWarning)
+        return 0
     # See `Uncertainty.get_significant_digit` for documentation
     if u == 0:
         return 0
