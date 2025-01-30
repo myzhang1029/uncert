@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from .common import _get_significant_digit_one, _round_arr_or_scalar
+from ._common import get_significant_digit_one, round_arr_or_scalar
 
 
 class Uncertainty:
@@ -99,7 +99,7 @@ class Uncertainty:
         n : int
             The index as described above, useful for passing into `round`.
         """
-        return _get_significant_digit_one(self.u)
+        return get_significant_digit_one(self.u)
 
     def get_value(self):
         """Get the underlying uncertainty value."""
@@ -108,7 +108,7 @@ class Uncertainty:
     def get_rounded_value(self):
         """Get the underlying uncertainty value after rounding."""
         npow = self.get_significant_digit()
-        return _round_arr_or_scalar(self.u, npow)
+        return round_arr_or_scalar(self.u, npow)
 
     def is_array_type(self):
         """Check if this `Uncertainty` is an array or a scalar."""

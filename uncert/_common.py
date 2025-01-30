@@ -1,3 +1,5 @@
+"""Common helper functions for the package."""
+
 import math
 import warnings
 
@@ -5,11 +7,16 @@ import numpy as np
 
 
 @np.vectorize
-def _get_significant_digit_one(u):
+def get_significant_digit_one(u):
+    """Get the negative index of MSD for rounding uncertainties.
+
+    See Also
+    --------
+    Uncertainty.get_significant_digit
+    """
     if np.isnan(u) or np.isinf(u):
         warnings.warn("NaN or inf uncertainty encountered", RuntimeWarning)
         return 0
-    # See `Uncertainty.get_significant_digit` for documentation
     if u == 0:
         return 0
     absv = abs(u)
@@ -30,16 +37,16 @@ def _get_significant_digit_one(u):
     return -npow
 
 
-def _round_arr_or_scalar(num, digits):
+def round_arr_or_scalar(num, digits):
     """round(num, digits) or that threaded over np.ndarray
 
     Examples
     --------
-    >>> _round_arr_or_scalar(10.123, 1)
+    >>> round_arr_or_scalar(10.123, 1)
     10.1
-    >>> _round_arr_or_scalar([0.12,0.234,3.0], 2)
+    >>> round_arr_or_scalar([0.12,0.234,3.0], 2)
     array([0.12, 0.23, 3.  ])
-    >>> _round_arr_or_scalar([0.12,0.234,3.0], [0, 2, 1])
+    >>> round_arr_or_scalar([0.12,0.234,3.0], [0, 2, 1])
     array([0.  , 0.23, 3.  ])
     """
     if (isinstance(num, np.ndarray) and num.shape != ()) or isinstance(num, list):

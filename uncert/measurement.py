@@ -4,9 +4,9 @@ import warnings
 
 import numpy as np
 
-from .common import _round_arr_or_scalar
-from .uncertainty import Uncertainty
+from ._common import round_arr_or_scalar
 from ._derivative_table import OPERATIONS
+from .uncertainty import Uncertainty
 
 
 class Measurement:
@@ -126,7 +126,7 @@ class Measurement:
     def get_rounded_center(self):
         """Get the rounded center value of self."""
         npow = self.uncert.get_significant_digit()
-        return _round_arr_or_scalar(self.center, npow)
+        return round_arr_or_scalar(self.center, npow)
 
     def get_rounded_uncert(self):
         """Get the rounded uncertainty of self."""
