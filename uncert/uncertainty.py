@@ -208,7 +208,7 @@ class Uncertainty:
 
         Parameters
         ----------
-        other : int or float or ndarray
+        other : Uncertainty or int or float or ndarray
             The other uncertainty to add.
         r : int or float or ndarray, optional
             The correlation coefficient between the two measurements. The
@@ -219,9 +219,11 @@ class Uncertainty:
         Uncertainty
             Resulting uncertainty.
         """
-        if not isinstance(other, Uncertainty):
-            raise TypeError("Can only add two instances of `Uncertainty`")
-        m = self.u**2 + other.u**2 + 2 * self.u * other.u * r
+        if isinstance(other, Uncertainty):
+            other_u = other.u
+        else:
+            other_u = other
+        m = self.u**2 + other_u**2 + 2 * self.u * other_u * r
         return Uncertainty(m ** 0.5)
 
     def __add__(self, other):
