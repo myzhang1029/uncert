@@ -6,6 +6,7 @@ import numpy as np
 
 from .common import _round_arr_or_scalar
 from .uncertainty import Uncertainty
+from ._derivative_table import OPERATIONS
 
 
 class Measurement:
@@ -94,6 +95,25 @@ class Measurement:
             raise ValueError("The lengths of `center` and `uncert` must match")
         # array-type uncert implies array center,
         # but array center does not imply array-type uncert
+        # Generate NumPy hooks for all the functions
+        self._make_numpy_hook_functions()
+
+    def _make_numpy_hook_functions(self):
+        """Generate NumPy hooks for supported numerical operations."""
+        for func, deriv in OPERATIONS:
+            # Make sure `func` and `deriv` are captured in the closure
+            def generate_func(func, deriv):
+                def helper_func(self, *args, **kwargs):
+                    # This is the actual operation
+                    new_center = func(self.center, *args, **kwargs)
+                    new_uncert = self.uncert.u * np.abs(deriv(self.center))
+                    return Measurement(new_center, new_uncert)
+                helper_func.__name__ = func.__name__
+                helper_func.__doc__ = f"Apply `np.{func.__name__}` to the center value and propagate uncertainty"
+                helper_func.__qualname__ = f"Measurement.{func.__name__}"
+                return helper_func
+            helper_func = generate_func(func, deriv)
+            setattr(Measurement, func.__name__, helper_func)
 
     def get_center(self):
         """Get the center value of self."""
