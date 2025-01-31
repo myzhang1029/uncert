@@ -86,6 +86,8 @@ class Uncertainty:
             uncert = full
         # Fix negative inputs
         self.u = abs(np.asarray(uncert))
+        # Generate comparison methods
+        self._make_comparison_methods()
 
     def get_significant_digit(self):
         """Get the negative index of MSD for rounding uncertainties.
@@ -273,27 +275,18 @@ class Uncertainty:
     def __float__(self):
         return float(self.u)
 
-    def _comparison_method(self, other, operation):
-        """Shared code for `__lt__`, `__le__`, etc."""
-        method_name = f"__{operation}__"
-        if isinstance(other, Uncertainty):
-            return getattr(self.u, method_name)(other.u)
-        return getattr(self.u, method_name)(other)
-
-    def __lt__(self, other):
-        return self._comparison_method(other, "lt")
-
-    def __le__(self, other):
-        return self._comparison_method(other, "le")
-
-    def __eq__(self, other):
-        return self._comparison_method(other, "eq")
-
-    def __ne__(self, other):
-        return self._comparison_method(other, "ne")
-
-    def __gt__(self, other):
-        return self._comparison_method(other, "gt")
-
-    def __ge__(self, other):
-        return self._comparison_method(other, "ge")
+    def _make_comparison_methods(self):
+        """Generate comparison methods for `Measurement`."""
+        for operation in ("lt", "le", "eq", "ne", "gt", "ge"):
+            method_name = f"__{operation}__"
+            # Make sure `method_name` is captured in the closure
+            def generate_method(method_name):
+                def comparison_method(self, other):
+                    if isinstance(other, Uncertainty):
+                        return getattr(self.u, method_name)(other.u)
+                    return getattr(self.u, method_name)(other)
+                comparison_method.__name__ = method_name
+                comparison_method.__qualname__ = f"Uncertainty.{method_name}"
+                return comparison_method
+            comparison_method = generate_method(method_name)
+            setattr(self, method_name, comparison_method)

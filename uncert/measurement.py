@@ -97,23 +97,8 @@ class Measurement:
         # but array center does not imply array-type uncert
         # Generate NumPy hooks for all the functions
         self._make_numpy_hook_functions()
-
-    def _make_numpy_hook_functions(self):
-        """Generate NumPy hooks for supported numerical operations."""
-        for func, deriv in OPERATIONS:
-            # Make sure `func` and `deriv` are captured in the closure
-            def generate_func(func, deriv):
-                def helper_func(self, *args, **kwargs):
-                    # This is the actual operation
-                    new_center = func(self.center, *args, **kwargs)
-                    new_uncert = self.uncert.u * np.abs(deriv(self.center))
-                    return Measurement(new_center, new_uncert)
-                helper_func.__name__ = func.__name__
-                helper_func.__doc__ = f"Apply `np.{func.__name__}` to the center value and propagate uncertainty"
-                helper_func.__qualname__ = f"Measurement.{func.__name__}"
-                return helper_func
-            helper_func = generate_func(func, deriv)
-            setattr(Measurement, func.__name__, helper_func)
+        # Generate comparison methods
+        self._make_comparison_methods()
 
     def get_center(self):
         """Get the center value of self."""
@@ -386,29 +371,37 @@ class Measurement:
             diff = self - other
         return (abs(diff.center) / diff.uncert.u).tolist()
 
-    def _comparison_method(self, other, operation):
-        """Shared code for `__lt__`, `__le__`, etc."""
-        method_name = f"__{operation}__"
-        if isinstance(other, Measurement):
-            warnings.warn("Comparison of measurements compares the center value only."
-                          " For statistical comparison, use `Measurement.tscore`")
-            return getattr(self.center, method_name)(other.center)
-        return getattr(self.center, method_name)(other)
+    def _make_numpy_hook_functions(self):
+        """Generate NumPy hooks for supported numerical operations."""
+        for func, deriv in OPERATIONS:
+            # Make sure `func` and `deriv` are captured in the closure
+            def generate_func(func, deriv):
+                def helper_func(self, *args, **kwargs):
+                    # This is the actual operation
+                    new_center = func(self.center, *args, **kwargs)
+                    new_uncert = self.uncert.u * np.abs(deriv(self.center))
+                    return Measurement(new_center, new_uncert)
+                helper_func.__name__ = func.__name__
+                helper_func.__doc__ = f"Apply `np.{func.__name__}` to the center value and propagate uncertainty."
+                helper_func.__qualname__ = f"Measurement.{func.__name__}"
+                return helper_func
+            helper_func = generate_func(func, deriv)
+            setattr(self, func.__name__, helper_func)
 
-    def __lt__(self, other):
-        return self._comparison_method(other, "lt")
-
-    def __le__(self, other):
-        return self._comparison_method(other, "le")
-
-    def __eq__(self, other):
-        return self._comparison_method(other, "eq")
-
-    def __ne__(self, other):
-        return self._comparison_method(other, "ne")
-
-    def __gt__(self, other):
-        return self._comparison_method(other, "gt")
-
-    def __ge__(self, other):
-        return self._comparison_method(other, "ge")
+    def _make_comparison_methods(self):
+        """Generate comparison methods for `Measurement`."""
+        for operation in ("lt", "le", "eq", "ne", "gt", "ge"):
+            method_name = f"__{operation}__"
+            # Make sure `method_name` is captured in the closure
+            def generate_method(method_name):
+                def comparison_method(self, other):
+                    if isinstance(other, Measurement):
+                        warnings.warn("Comparison of measurements compares the center value only."
+                                      " For statistical comparison, use `Measurement.tscore`")
+                        return getattr(self.center, method_name)(other.center)
+                    return getattr(self.center, method_name)(other)
+                comparison_method.__name__ = method_name
+                comparison_method.__qualname__ = f"Measurement.{method_name}"
+                return comparison_method
+            comparison_method = generate_method(method_name)
+            setattr(self, method_name, comparison_method)
