@@ -2,12 +2,17 @@
 
 import math
 import warnings
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
+
+FloatOrArray = np.floating[Any] | NDArray[np.floating[Any]]
+IntegerOrArray = np.integer[Any] | NDArray[np.integer[Any]]
 
 
 @np.vectorize
-def get_significant_digit_one(u):
+def get_significant_digit_one(u: np.floating[Any]) -> int:
     """Get the negative index of MSD for rounding uncertainties.
 
     See Also
@@ -37,7 +42,10 @@ def get_significant_digit_one(u):
     return -npow
 
 
-def round_arr_or_scalar(num, digits):
+def round_arr_or_scalar(
+    num: FloatOrArray,
+    digits: IntegerOrArray,
+) -> float | NDArray[np.floating[Any]]:
     """round(num, digits) or that threaded over np.ndarray
 
     Examples
@@ -49,13 +57,15 @@ def round_arr_or_scalar(num, digits):
     >>> round_arr_or_scalar([0.12,0.234,3.0], [0, 2, 1])
     array([0.  , 0.23, 3.  ])
     """
-    if (isinstance(num, np.ndarray) and num.shape != ()) or isinstance(num, list):
-        if isinstance(digits, (np.ndarray, list)):
-            if len(num) != len(digits):
+    npnum = np.asarray(num)
+    npdig = np.asarray(digits)
+    if npnum.shape != ():
+        if npdig.shape != ():
+            if len(npnum) != len(npdig):
                 raise ValueError(
                     "The lengths of `num` and `digits` must match")
-            return np.array([round(u, n) for u, n in zip(num, digits)])
+            return np.array([round(u, n) for u, n in zip(npnum, npdig)])
         # Else just use np.round(arr, scalar)
-        return np.round(num, digits)
+        return npnum.round(npdig)
     # Both are scalars
-    return round(float(num), digits)
+    return round(float(npnum), int(npdig))
