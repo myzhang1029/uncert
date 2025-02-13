@@ -170,7 +170,8 @@ class Measurement:
 
     def __delitem__(self, idx):
         self.center = np.delete(self.center, idx)
-        self.uncert = np.delete(self.uncert, idx)
+        if self.uncert.is_array_type():
+            del self.uncert[idx]
 
     def __len__(self):
         return len(self.center)
