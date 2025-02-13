@@ -36,12 +36,24 @@ class Uncertainty:
     '0.10'
 
     Edge case behaviour:
+
     >>> u = Uncertainty(0.198)
     >>> str(u)
     '0.2'
     >>> u = Uncertainty(1.96)
     >>> str(u)
     '2'
+
+    The full precision is kept in `__repr__`:
+
+    >>> Uncertainty(1.23456789)
+    Uncertainty(1.2, full=1.23456789)
+
+    This allows the repr to be used to recreate the object:
+
+    >>> Uncertainty(99, full=1.23456789)
+    Uncertainty(1.2, full=1.23456789)
+
 
     Adding `Uncertainty` is done in quadrature by default:
 
@@ -77,6 +89,19 @@ class Uncertainty:
 
     >>> Uncertainty([10, 10]) + Uncertainty(5)
     Uncertainty([11, 11], full=[11.180339887498949, 11.180339887498949])
+
+    Python element operations are supported:
+
+    >>> u = Uncertainty([1, 2, 3])
+    >>> u.append(4)
+    >>> u
+    Uncertainty([1.0, 2, 3, 4], full=[1, 2, 3, 4])
+    >>> del u[1]
+    >>> u
+    Uncertainty([1.0, 3, 4], full=[1, 3, 4])
+    >>> u[1] = 2
+    >>> u
+    Uncertainty([1.0, 2, 4], full=[1, 2, 4])
     """
 
     def __init__(self, uncert, full=None):

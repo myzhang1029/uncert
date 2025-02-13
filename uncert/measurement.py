@@ -26,6 +26,7 @@ class Measurement:
 
     However, if the two `Measurement`s are the same one, the correlation
     coefficient is assumed to be 1:
+
     >>> str(val - val)
     '0 ± 0'
     >>> str(val + val)
@@ -33,8 +34,14 @@ class Measurement:
 
     The Python `__repr__` of `Measurement` retains the full precision while
     still letting the user see the rounded values:
+
     >>> val
     Measurement(30, 4, full_center=30.119999999999997, full_uncert=3.6886313179823222)
+
+    This allows the repr to be used to recreate the object:
+
+    >>> Measurement(10, 2, full_center=123.456, full_uncert=0.0156)
+    Measurement(123.456, 0.016, full_center=123.456, full_uncert=0.0156)
 
     Also useful for formatting a single value with uncertainty:
 
@@ -54,12 +61,19 @@ class Measurement:
     >>> str(1 / Measurement(10, 1))
     '0.100 ± 0.010'
 
+    NumPy functions are supported with uncertainties propagated:
+
+    >>> np.arccos(Measurement(0.5, 0.1))
+    Measurement(1.05, 0.12, full_center=1.0471975511965976, full_uncert=0.11547005383792518)
+
     There is also array-type `Measurement`:
+
     >>> mar = Measurement(np.arange(5), np.arange(0.1, 0.3, 0.04))
     >>> str(mar)
     '[0.00 ± 0.10, 1.00 ± 0.14, 2.00 ± 0.18, 3.0 ± 0.2, 4.0 ± 0.3]'
 
     They work just like arrays:
+
     >>> mar[2]
     Measurement(2.00, 0.18, full_center=2, full_uncert=0.18000000000000002)
     >>> str(mar[4])
@@ -71,11 +85,27 @@ class Measurement:
     Measurement([0.0, 3.0, 6.0, 9.0, 12.0], [0.3, 0.4, 0.5, 0.7, 0.8], full_center=[0, 3, 6, 9, 12], full_uncert=[0.30000000000000004, 0.42000000000000004, 0.54, 0.6600000000000001, 0.78])
 
     Array-type `Measurement` can be converted to and from a list of `Measurement`:
+
     >>> lm = mar.as_simple_list()
     >>> lm
     [Measurement(0.00, 0.10, full_center=0, full_uncert=0.1), Measurement(1.00, 0.14, full_center=1, full_uncert=0.14), Measurement(2.00, 0.18, full_center=2, full_uncert=0.18000000000000002), Measurement(3.0, 0.2, full_center=3, full_uncert=0.22000000000000003), Measurement(4.0, 0.3, full_center=4, full_uncert=0.26)]
     >>> Measurement.from_simple_list(lm)
     Measurement([0.00, 1.00, 2.00, 3.0, 4.0], [0.10, 0.14, 0.18, 0.2, 0.3], full_center=[0, 1, 2, 3, 4], full_uncert=[0.1, 0.14, 0.18000000000000002, 0.22000000000000003, 0.26])
+
+    Python element operations are supported:
+
+    >>> mar[1] = Measurement(10, 1)
+    >>> str(mar)
+    '[0.00 ± 0.10, 10.0 ± 1.0, 2.00 ± 0.18, 3.0 ± 0.2, 4.0 ± 0.3]'
+    >>> mar[2] = (9, 0.154)
+    >>> str(mar)
+    '[0.00 ± 0.10, 10.0 ± 1.0, 9.00 ± 0.15, 3.0 ± 0.2, 4.0 ± 0.3]'
+    >>> mar[1] += Measurement(10, 1)
+    >>> str(mar)
+    '[0.00 ± 0.10, 20.0 ± 1.4, 9.00 ± 0.15, 3.0 ± 0.2, 4.0 ± 0.3]'
+    >>> del mar[1]
+    >>> str(mar)
+    '[0.00 ± 0.10, 9.00 ± 0.15, 3.0 ± 0.2, 4.0 ± 0.3]'
     """
 
     def __init__(self, center, uncert, full_center=None, full_uncert=None):
