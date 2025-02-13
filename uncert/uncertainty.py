@@ -128,10 +128,6 @@ class Uncertainty:
         """
         return get_significant_digit_one(self.u)
 
-    def get_value(self):
-        """Get the underlying uncertainty value."""
-        return self.u
-
     def get_rounded_value(self):
         """Get the underlying uncertainty value after rounding."""
         npow = self.get_significant_digit()

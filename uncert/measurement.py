@@ -130,14 +130,6 @@ class Measurement:
         # Generate comparison methods
         self._make_comparison_methods()
 
-    def get_center(self):
-        """Get the center value of self."""
-        return self.center
-
-    def get_uncert(self):
-        """Get the uncertainty of self."""
-        return self.uncert
-
     def get_rounded_center(self):
         """Get the rounded center value of self."""
         npow = self.uncert.get_significant_digit()
