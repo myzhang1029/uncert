@@ -1,5 +1,7 @@
 """Common helper functions for the package."""
 
+from __future__ import annotations
+
 import math
 import warnings
 from typing import Any

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "uncert"
-version = "0.1.2"
+version = "0.2.0"
 authors = [
   { name="Zhang Maiyun", email="maz005@ucsd.edu" },
 ]
 description = "Simple arithmetic and displaying of measurements and uncertainties"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.7"
 classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "numpy"
+    "numpy >= 1.21.0",
 ]
 
 [project.urls]
