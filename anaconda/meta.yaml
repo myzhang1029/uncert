@@ -1,0 +1,38 @@
+{% set version = "0.2.0" %}
+package:
+  name: "uncert"
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/myzhang1029/uncert.git
+  git_rev: v{{ version }}
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.7
+    - setuptools
+    - pip
+  run:
+    - python >=3.7
+    - numpy >=1.21.0
+
+test:
+  imports:
+    - uncert
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  summary: Simple arithmetic and displaying of measurements and uncertainties
+  license: 'AGPL-3.0-or-later'
+
+extra:
+  recipe-maintainers:
+    - myzhang1029
